@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name="t3py",
@@ -16,10 +16,10 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.7",
-    install_requires=["click"],
+    install_requires=["typer", "requests"],
     entry_points={
         'console_scripts': [
-            'greet=t3py.main:greet',
+            't3=t3py.main:app'
         ],
     },
 )
