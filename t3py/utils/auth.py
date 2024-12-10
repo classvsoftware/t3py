@@ -34,19 +34,24 @@ def obtain_api_auth_data_or_error(
     Obtain access token using provided credentials.
     """
     logger.info("Obtaining access token...")
-    url = f"https://{credentials.hostname}/v2/auth/credentials"
-    data = {
+    url = f"{BASE_URL}/v2/auth/credentials"
+    user_credential_data = {
         "hostname": credentials.hostname,
         "username": credentials.username,
         "password": credentials.password,
     }
     if credentials.otp:
-        data["otp"] = credentials.otp
+        user_credential_data["otp"] = credentials.otp
 
-    response = post_request(session=session, url=url, data=data)
-    if response and "accessToken" in response:
-        access_token = response["accessToken"]
-        refresh_token = response["refreshToken"]
+    headers = {
+        "Content-Type": "application/json",
+    }
+
+    authentication_response = post_request(session=session, headers=headers, url=url, data=user_credential_data)
+    authentication_data = authentication_response.json()
+    if authentication_data and "accessToken" in authentication_data:
+        access_token = authentication_data["accessToken"]
+        refresh_token = authentication_data["refreshToken"]
         
         logger.info("Retrieving identity...")
         url = f"{BASE_URL}/v2/auth/whoami"
@@ -54,18 +59,19 @@ def obtain_api_auth_data_or_error(
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",
         }
-        identity = get_request(session=session, url=url, headers=headers)
+        identity_response = get_request(session=session, url=url, headers=headers)
+        identity_data = identity_response.json()
     
-        if identity is None:
+        if identity_data is None:
             raise ValueError("Identity cannot be None")
 
         return APIAuthData(
-            auth_mode=cast(str, identity.get("authMode", "")),
+            auth_mode=cast(str, identity_data.get("authMode", "")),
             access_token=access_token,
             refresh_token=refresh_token,
-            has_t3_plus=cast(bool, identity.get("hasT3Plus", False)),
-            username=cast(str, identity.get("username", "")),
-            hostname=cast(str, identity.get("hostname", ""))
+            has_t3_plus=cast(bool, identity_data.get("hasT3Plus", False)),
+            username=cast(str, identity_data.get("username", "")),
+            hostname=cast(str, identity_data.get("hostname", ""))
         )
 
     raise Exception("Failed to obtain access token. Please check your credentials.")

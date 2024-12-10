@@ -1,29 +1,23 @@
-import requests
 from typing import Dict, Optional
+
+import requests
+
 from t3py.consts import BASE_URL, TIMEOUT_S, logger
 
 
-def post_request(*, session: requests.Session, url: str, data: Dict) -> Optional[Dict]:
+def post_request(*, session: requests.Session, headers: Dict[str, str], url: str, data: Dict) -> requests.Response:
     """
-    Make a POST request and return the JSON response, or None on failure.
+    Make a POST request and return the response.
     """
-    try:
-        response = session.post(url=url, json=data, timeout=TIMEOUT_S)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        logger.error(f"POST request failed: {e}")
-        return None
+    response = session.post(url=url, headers=headers, json=data, timeout=TIMEOUT_S)
+    response.raise_for_status()
+    return response
 
 
-def get_request(*, session: requests.Session, url: str, headers: Dict[str, str]) -> Optional[Dict]:
+def get_request(*, session: requests.Session, url: str, headers: Dict[str, str]) -> requests.Response:
     """
-    Make a GET request and return the JSON response, or None on failure.
+    Make a GET request and return the response.
     """
-    try:
-        response = session.get(url=url, headers=headers, timeout=TIMEOUT_S)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        logger.error(f"GET request failed: {e}")
-        return None
+    response = session.get(url=url, headers=headers, timeout=TIMEOUT_S)
+    response.raise_for_status()
+    return response

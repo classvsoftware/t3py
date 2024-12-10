@@ -4,24 +4,54 @@
 #
 #    pip-compile dev_requirements.in
 #
+black==24.10.0
+    # via -r dev_requirements.in
 certifi==2024.8.30
     # via requests
 charset-normalizer==3.4.0
     # via requests
 click==8.1.7
-    # via typer
+    # via
+    #   black
+    #   typer
+flake8==7.1.1
+    # via -r dev_requirements.in
 idna==3.10
     # via requests
+iniconfig==2.0.0
+    # via pytest
+isort==5.13.2
+    # via -r dev_requirements.in
 markdown-it-py==3.0.0
     # via rich
+mccabe==0.7.0
+    # via flake8
 mdurl==0.1.2
     # via markdown-it-py
 mypy==1.13.0
     # via -r dev_requirements.in
 mypy-extensions==1.0.0
-    # via mypy
+    # via
+    #   black
+    #   mypy
+packaging==24.2
+    # via
+    #   black
+    #   pytest
+pathspec==0.12.1
+    # via black
+platformdirs==4.3.6
+    # via black
+pluggy==1.5.0
+    # via pytest
+pycodestyle==2.12.1
+    # via flake8
+pyflakes==3.2.0
+    # via flake8
 pygments==2.18.0
     # via rich
+pytest==8.3.4
+    # via -r dev_requirements.in
 requests==2.32.3
     # via -r /Users/mattfrisbie/Documents/Projects/t3py/requirements.in
 rich==13.9.4
