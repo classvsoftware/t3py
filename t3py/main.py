@@ -46,8 +46,8 @@ def show_menu(api_auth_data):
 
 @app.command()
 def main(
-    hostname: str = typer.Option(..., help="The hostname of the Track and Trace Tools API (e.g., mo.metrc.com)."),
-    username: str = typer.Option(..., help="Username for authentication with the Track and Trace Tools API."),
+    hostname: str = typer.Option(..., help="The hostname where you log into Metrc (e.g., mo.metrc.com)."),
+    username: str = typer.Option(..., help="Username used to log into Metrc."),
 ):
     """
     Authenticate with the Track and Trace Tools API and show a menu of options.
