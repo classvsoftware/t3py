@@ -5,6 +5,8 @@
 `pip-compile requirements.in`
 `pip-compile dev_requirements.in`
 
+`mypy t3py/**/*.py --check-untyped-defs`
+
 ## Deployment
 
 Reinstall the package locally to test:
@@ -12,3 +14,5 @@ Reinstall the package locally to test:
 
 Test the command:
 `t3py`
+
+
