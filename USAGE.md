@@ -11,4 +11,4 @@ Reinstall the package locally to test:
 `pip install -e .`
 
 Test the command:
-`t3`
+`t3py`

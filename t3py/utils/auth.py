@@ -4,11 +4,16 @@ from dataclasses import dataclass
 from typing import Optional, cast
 
 import requests
+from rich.console import Console
+from rich.prompt import Prompt
+from rich.text import Text
 
 from t3py.consts import BASE_URL, logger
 
 from .http import get_request, post_request
 
+# Initialize Rich Console
+console = Console()
 
 @dataclass
 class Credentials:
@@ -16,7 +21,6 @@ class Credentials:
     username: str
     password: str
     otp: Optional[str] = None
-    
 
 @dataclass
 class APIAuthData:
@@ -33,7 +37,7 @@ def obtain_api_auth_data_or_error(
     """
     Obtain access token using provided credentials.
     """
-    logger.info("Obtaining access token...")
+    console.print("[bold cyan]Obtaining access token...[/bold cyan]")
     url = f"{BASE_URL}/v2/auth/credentials"
     user_credential_data = {
         "hostname": credentials.hostname,
@@ -52,8 +56,8 @@ def obtain_api_auth_data_or_error(
     if authentication_data and "accessToken" in authentication_data:
         access_token = authentication_data["accessToken"]
         refresh_token = authentication_data["refreshToken"]
-        
-        logger.info("Retrieving identity...")
+
+        console.print("[bold green]Authentication successful! Retrieving identity...[/bold green]")
         url = f"{BASE_URL}/v2/auth/whoami"
         headers = {
             "Authorization": f"Bearer {access_token}",
@@ -61,9 +65,9 @@ def obtain_api_auth_data_or_error(
         }
         identity_response = get_request(session=session, url=url, headers=headers)
         identity_data = identity_response.json()
-    
+
         if identity_data is None:
-            raise ValueError("Identity cannot be None")
+            raise ValueError("[bold red]Identity cannot be None[/bold red]")
 
         return APIAuthData(
             auth_mode=cast(str, identity_data.get("authMode", "")),
@@ -74,28 +78,31 @@ def obtain_api_auth_data_or_error(
             hostname=cast(str, identity_data.get("hostname", ""))
         )
 
+    console.print("[bold red]Failed to obtain access token. Please check your credentials.[/bold red]")
     raise Exception("Failed to obtain access token. Please check your credentials.")
-
 
 def authenticate_or_error(*, hostname: str, username: str) -> APIAuthData:
     """
     Handle the authentication process with the T3 API.
     """
-    password = getpass.getpass(prompt=f"Password for {hostname}/{username}: ")
+    console.print(f"[bold yellow]Password required for {hostname}/{username}[/bold yellow]")
+    password = getpass.getpass(prompt=Text("Password: ", style="bold yellow"))
 
     otp = None
     if hostname == "mi.metrc.com":
-        otp = getpass.getpass(prompt="OTP: ")
+        console.print("[bold yellow]Enter OTP for additional verification.[/bold yellow]")
+        otp = getpass.getpass(prompt=Text("OTP: ", style="bold yellow"))
 
     credentials = Credentials(
         hostname=hostname, username=username, password=password, otp=otp
     )
 
     with requests.Session() as session:
-        api_auth_data = obtain_api_auth_data_or_error(session=session, credentials=credentials)
-        if not api_auth_data:
+        try:
+            api_auth_data = obtain_api_auth_data_or_error(session=session, credentials=credentials)
+            console.print("[bold green]Authentication process completed successfully![/bold green]")
+            return api_auth_data
+        except Exception as e:
+            console.print(f"[bold red]Error: {str(e)}[/bold red]")
             logger.error("Failed to authenticate.")
             sys.exit(1)
-            
-        return api_auth_data
-

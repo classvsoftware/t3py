@@ -19,7 +19,7 @@ setup(
     install_requires=["typer", "requests"],
     entry_points={
         'console_scripts': [
-            't3=t3py.main:app'
+            't3py=t3py.main:app'
         ],
     },
 )
