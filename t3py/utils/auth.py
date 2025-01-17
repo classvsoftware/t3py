@@ -1,4 +1,5 @@
 import getpass
+from pathlib import Path
 import sys
 from dataclasses import dataclass
 from typing import Optional, cast
@@ -30,6 +31,8 @@ class APIAuthData:
     hostname: str
     access_token: str
     refresh_token: str
+
+
 
 def obtain_api_auth_data_or_error(
     *, session: requests.Session, credentials: Credentials
@@ -81,21 +84,57 @@ def obtain_api_auth_data_or_error(
     console.print("[bold red]Failed to obtain access token. Please check your credentials.[/bold red]")
     raise Exception("Failed to obtain access token. Please check your credentials.")
 
-def authenticate_or_error(*, hostname: str, username: str) -> APIAuthData:
+def gather_credentials_or_error(*, hostname: Optional[str], username: Optional[str], credentiall_file: Optional[Path]) -> Credentials:
+    
+    password = None  # Initialize password variable
+    
+    
+    if credential_file:
+        try:
+            with open(credential_file, "r") as file:
+                credentials = json.load(file)
+                hostname = credentials.get("hostname")
+                username = credentials.get("username")
+                password = credentials.get("password")
+                if not all([hostname, username, password]):
+                    raise ValueError(
+                        "The JSON file must contain 'hostname', 'username', and 'password' fields."
+                    )
+        except Exception as e:
+            console.print(f"[bold red]Error reading credential file: {e}[/bold red]")
+            raise typer.Exit(code=1)
+    else:
+        if not hostname or not username:
+            console.print(
+                "[bold red]You must provide --hostname and --username if not using --credential-file.[/bold red]"
+            )
+            raise typer.Exit(code=1)
+
+        console.print(
+            f"[bold yellow]Password required for {hostname}/{username}[/bold yellow]"
+        )
+        password = getpass.getpass(prompt=f"Password for {hostname}/{username}: ")
+        
+        console.print(f"[bold yellow]Password required for {hostname}/{username}[/bold yellow]")
+        password = getpass.getpass(prompt=Text("Password: ", style="bold yellow"))
+
+        otp = None
+        if hostname == "mi.metrc.com":
+            console.print("[bold yellow]Enter OTP for additional verification.[/bold yellow]")
+            otp = getpass.getpass(prompt=Text("OTP: ", style="bold yellow"))
+
+        credentials = Credentials(
+            hostname=hostname, username=username, password=password, otp=otp
+        )
+
+    
+
+
+def authenticate_or_error(*, credentials: Credentials) -> APIAuthData:
     """
     Handle the authentication process with the T3 API.
     """
-    console.print(f"[bold yellow]Password required for {hostname}/{username}[/bold yellow]")
-    password = getpass.getpass(prompt=Text("Password: ", style="bold yellow"))
-
-    otp = None
-    if hostname == "mi.metrc.com":
-        console.print("[bold yellow]Enter OTP for additional verification.[/bold yellow]")
-        otp = getpass.getpass(prompt=Text("OTP: ", style="bold yellow"))
-
-    credentials = Credentials(
-        hostname=hostname, username=username, password=password, otp=otp
-    )
+    console.print("[bold cyan]Authenticating...[/bold cyan]")
 
     with requests.Session() as session:
         try:
@@ -106,3 +145,5 @@ def authenticate_or_error(*, hostname: str, username: str) -> APIAuthData:
             console.print(f"[bold red]Error: {str(e)}[/bold red]")
             logger.error("Failed to authenticate.")
             sys.exit(1)
+
+    console.print("[bold green]Authentication successful![/bold green]")

@@ -1,3 +1,7 @@
+import getpass
+import json
+from pathlib import Path
+
 import typer
 from rich.console import Console
 from rich.prompt import Prompt
@@ -10,18 +14,22 @@ from t3py.utils.auth import authenticate_or_error
 app = typer.Typer()
 console = Console()
 
+
 def check_identity_option(api_auth_data):
     """Check the user's identity."""
     console.print("[bold cyan]Checking identity...[/bold cyan]")
     check_identity(api_auth_data=api_auth_data)
 
+
 def dummy_operation_1():
     """Perform a dummy operation."""
     console.print("[bold green]Performing dummy operation 1...[/bold green]")
 
+
 def dummy_operation_2():
     """Perform a dummy operation."""
     console.print("[bold green]Performing dummy operation 2...[/bold green]")
+
 
 def show_menu(api_auth_data):
     """Show a menu of options for the user to choose from."""
@@ -37,7 +45,11 @@ def show_menu(api_auth_data):
         console.print(table)
 
         # Prompt user for input
-        choice = Prompt.ask("[bold yellow]Enter your choice[/bold yellow]", choices=["1", "2", "3", "4"], default="4")
+        choice = Prompt.ask(
+            "[bold yellow]Enter your choice[/bold yellow]",
+            choices=["1", "2", "3", "4"],
+            default="4",
+        )
 
         if choice == "1":
             check_identity_option(api_auth_data)
@@ -51,16 +63,27 @@ def show_menu(api_auth_data):
         else:
             console.print("[bold red]Invalid choice. Please try again.[/bold red]")
 
+
 @app.command()
 def main(
-    hostname: str = typer.Option(..., help="The hostname where you log into Metrc (e.g., mo.metrc.com)."),
-    username: str = typer.Option(..., help="Username used to log into Metrc."),
+    hostname: str = typer.Option(
+        None, help="The hostname where you log into Metrc (e.g., mo.metrc.com)."
+    ),
+    username: str = typer.Option(None, help="Username used to log into Metrc."),
+    credential_file: Path = typer.Option(
+        None,
+        help="Path to a JSON file containing 'hostname', 'username', and 'password'.",
+    ),
 ):
     """
     Authenticate with the Track and Trace Tools API and show a menu of options.
     """
-    console.print("[bold cyan]Authenticating...[/bold cyan]")
-    api_auth_data = authenticate_or_error(hostname=hostname, username=username)
-    console.print("[bold green]Authentication successful![/bold green]")
 
+    credentials = gather_credentials_or_error(hostname=hostname, username=username, credential_file=credential_file)
+
+
+    api_auth_data = authenticate_or_error(
+        credentials=credentials
+    )
+    
     show_menu(api_auth_data)
