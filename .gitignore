@@ -108,4 +108,5 @@ ENV/
 .vscode/
 .idea/
 
+secrets/
 secrets.txt
