@@ -1,3 +1,32 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=61.0", "wheel", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "t3py"
+version = "0.1.0"
+description = "Toolkit for using the Track & Trace Tools API"
+readme = { file = "README.md", content-type = "text/markdown" }
+authors = [{ name = "Matt Frisbie", email = "matt@classvsoftware.com" }]
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+urls = { Homepage = "https://github.com/classvsoftware/t3py" }
+requires-python = ">=3.7"
+dependencies = [
+    "typer",
+    "requests"
+]
+
+[project.scripts]
+t3py = "t3py.main:app"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools_scm]
+# Optional: Configure file to write the version to
+write_to = "t3py/_version.py"
