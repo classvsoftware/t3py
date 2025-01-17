@@ -44,7 +44,6 @@ def show_menu(api_auth_data):
         table.add_column("Description")
         table.add_row("1", "Check Identity")
         table.add_row("4", "Exit")
-        table.margin = (1, 2)
 
         # Wrap the table in a panel
         panel = Panel(

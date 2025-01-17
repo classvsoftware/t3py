@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional, cast
 
 import requests
+from t3py.interfaces.auth import APIAuthData, Credentials
 import typer
 from rich.console import Console
 from rich.prompt import Prompt
@@ -18,23 +19,6 @@ from .http import get_request, post_request
 # Initialize Rich Console
 console = Console()
 
-
-@dataclass
-class Credentials:
-    hostname: str
-    username: str
-    password: str
-    otp: Optional[str] = None
-
-
-@dataclass
-class APIAuthData:
-    auth_mode: str
-    has_t3_plus: bool
-    username: str
-    hostname: str
-    access_token: str
-    refresh_token: str
 
 
 def metrc_hostname_uses_otp(*, hostname: str) -> bool:
@@ -101,8 +85,6 @@ def obtain_api_auth_data_or_error(
 def gather_credentials_or_error(
     *, hostname: Optional[str], username: Optional[str], credential_file: Optional[Path]
 ) -> Credentials:
-    password = None  # Initialize password variable
-
     if credential_file:
         try:
             with open(credential_file, "r") as file:

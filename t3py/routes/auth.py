@@ -1,0 +1,1 @@
+def authenticate(*, context: T3pyContext):
