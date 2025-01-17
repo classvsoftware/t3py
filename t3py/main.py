@@ -3,7 +3,9 @@ import json
 from pathlib import Path
 
 import typer
+from rich import box
 from rich.console import Console
+from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.table import Table
 from rich.text import Text
@@ -34,22 +36,29 @@ def dummy_operation_2():
 def show_menu(api_auth_data):
     """Show a menu of options for the user to choose from."""
     while True:
+        console.clear()
+
         # Display a table for the menu
-        table = Table(title="Main Menu", title_style="bold magenta")
+        table = Table(box=box.SIMPLE_HEAD)
         table.add_column("Option", style="bold")
         table.add_column("Description")
         table.add_row("1", "Check Identity")
-        table.add_row("2", "Dummy Operation 1")
-        table.add_row("3", "Dummy Operation 2")
         table.add_row("4", "Exit")
-        console.print(table)
+        table.margin = (1, 2)
+
+        # Wrap the table in a panel
+        panel = Panel(
+            table, title="t3py Main Menu", title_align="left", border_style="purple"
+        )
+
+        console.print(panel)
 
         # Prompt user for input
         choice = Prompt.ask(
             "[bold yellow]Enter your choice[/bold yellow]",
-            choices=["1", "2", "3", "4"],
-            default="4",
         )
+
+        console.clear()
 
         if choice == "1":
             check_identity_option(api_auth_data)
@@ -62,6 +71,11 @@ def show_menu(api_auth_data):
             break
         else:
             console.print("[bold red]Invalid choice. Please try again.[/bold red]")
+
+        console.print("\n")
+        console.input(
+            "[bold purple]Press any key to return to main menu.[/bold purple]"
+        )
 
 
 @app.command()
@@ -98,6 +112,8 @@ def main(
     )
 
     api_auth_data = authenticate_or_error(credentials=credentials)
+
+    console.clear()
 
     show_menu(api_auth_data)
 
