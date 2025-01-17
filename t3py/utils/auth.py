@@ -6,13 +6,13 @@ from pathlib import Path
 from typing import Optional, cast
 
 import requests
-from t3py.interfaces.auth import APIAuthData, Credentials
 import typer
 from rich.console import Console
 from rich.prompt import Prompt
 from rich.text import Text
 
 from t3py.consts import BASE_URL, logger
+from t3py.interfaces.auth import APIAuthData, CredentialsSnapshot, StaticCredentials
 
 from .http import get_request, post_request
 
@@ -20,13 +20,12 @@ from .http import get_request, post_request
 console = Console()
 
 
-
 def metrc_hostname_uses_otp(*, hostname: str) -> bool:
     return hostname == "mi.metrc.com"
 
 
 def obtain_api_auth_data_or_error(
-    *, session: requests.Session, credentials: Credentials
+    *, session: requests.Session, credentials_snapshot: CredentialsSnapshot
 ) -> APIAuthData:
     """
     Obtain access token using provided credentials.
@@ -34,12 +33,12 @@ def obtain_api_auth_data_or_error(
     console.print("[bold cyan]Obtaining access token...[/bold cyan]")
     url = f"{BASE_URL}/v2/auth/credentials"
     user_credential_data = {
-        "hostname": credentials.hostname,
-        "username": credentials.username,
-        "password": credentials.password,
+        "hostname": credentials_snapshot.hostname,
+        "username": credentials_snapshot.username,
+        "password": credentials_snapshot.password,
     }
-    if credentials.otp:
-        user_credential_data["otp"] = credentials.otp
+    if credentials_snapshot.otp:
+        user_credential_data["otp"] = credentials_snapshot.otp
 
     headers = {
         "Content-Type": "application/json",
@@ -48,7 +47,9 @@ def obtain_api_auth_data_or_error(
     authentication_response = post_request(
         session=session, headers=headers, url=url, data=user_credential_data
     )
+
     authentication_data = authentication_response.json()
+
     if authentication_data and "accessToken" in authentication_data:
         access_token = authentication_data["accessToken"]
         refresh_token = authentication_data["refreshToken"]
@@ -82,35 +83,45 @@ def obtain_api_auth_data_or_error(
     raise Exception("Failed to obtain access token. Please check your credentials.")
 
 
-def gather_credentials_or_error(
-    *, hostname: Optional[str], username: Optional[str], credential_file: Optional[Path]
-) -> Credentials:
-    if credential_file:
-        try:
-            with open(credential_file, "r") as file:
-                credentials = json.load(file)
-                hostname = credentials.get("hostname")
-                username = credentials.get("username")
-                password = credentials.get("password")
-                if not all([hostname, username, password]):
-                    raise ValueError(
-                        "The JSON file must contain 'hostname', 'username', and 'password' fields."
-                    )
-        except Exception as e:
-            console.print(f"[bold red]Error reading credential file: {e}[/bold red]")
-            raise typer.Exit(code=1)
-    else:
-        if not hostname or not username:
-            console.print(
-                "[bold red]You must provide --hostname and --username if not using --credential-file.[/bold red]"
-            )
-            raise typer.Exit(code=1)
+def gather_credentials_from_file_or_exit(
+    *, credential_file_path: Path
+) -> StaticCredentials:
+    try:
+        with open(credential_file_path, "r") as file:
+            credential_file_data = json.load(file)
+            hostname = credential_file_data.get("hostname")
+            username = credential_file_data.get("username")
+            password = credential_file_data.get("password")
+            if not all([hostname, username, password]):
+                raise ValueError(
+                    "The JSON file must contain 'hostname', 'username', and 'password' fields."
+                )
+    except Exception as e:
+        console.print(f"[bold red]Error reading credential file: {e}[/bold red]")
+        raise typer.Exit(code=1)
 
+    return StaticCredentials(hostname=hostname, username=username, password=password)
+
+
+def gather_credentials_from_flags_and_cli_input_or_exit(
+    *, hostname: Optional[str], username: Optional[str]
+) -> StaticCredentials:
+
+    if not hostname or not username:
         console.print(
-            f"[bold yellow]Password required for {hostname}/{username}[/bold yellow]"
+            "[bold red]You must provide --hostname and --username if not using --credential-file.[/bold red]"
         )
-        password = getpass.getpass(prompt=f"Password for {hostname}/{username}: ")
+        raise typer.Exit(code=1)
 
+    console.print(
+        f"[bold yellow]Password required for {hostname}/{username}[/bold yellow]"
+    )
+    password = getpass.getpass(prompt=f"Password for {hostname}/{username}: ")
+
+    return StaticCredentials(hostname=hostname, username=username, password=password)
+
+
+def gather_otp_from_cli_input_or_none(*, hostname: str) -> Optional[str]:
     otp = None
     if metrc_hostname_uses_otp(hostname=hostname):
         console.print(
@@ -118,14 +129,39 @@ def gather_credentials_or_error(
         )
         otp = getpass.getpass(prompt="OTP: ")
 
-    credentials = Credentials(
-        hostname=hostname, username=username, password=password, otp=otp
+    return otp
+
+
+def generate_credentials_snapshot_or_exit(
+    *,
+    hostname: Optional[str],
+    username: Optional[str],
+    credential_file_path: Optional[Path],
+) -> CredentialsSnapshot:
+    if credential_file_path:
+        static_credentials = gather_credentials_from_file_or_exit(
+            credential_file_path=credential_file_path
+        )
+    else:
+        static_credentials = gather_credentials_from_flags_and_cli_input_or_exit(
+            hostname=hostname, username=username
+        )
+
+    otp = gather_otp_from_cli_input_or_none(hostname=hostname)
+
+    credentials_snapshot = CredentialsSnapshot(
+        hostname=static_credentials.hostname,
+        username=static_credentials.username,
+        password=static_credentials.password,
+        otp=otp,
     )
 
-    return credentials
+    return credentials_snapshot
 
 
-def authenticate_or_error(*, credentials: Credentials) -> APIAuthData:
+def generate_api_auth_data_or_error(
+    *, credentials_snapshot: CredentialsSnapshot
+) -> APIAuthData:
     """
     Handle the authentication process with the T3 API.
     """
@@ -134,7 +170,7 @@ def authenticate_or_error(*, credentials: Credentials) -> APIAuthData:
     with requests.Session() as session:
         try:
             api_auth_data = obtain_api_auth_data_or_error(
-                session=session, credentials=credentials
+                session=session, credentials_snapshot=credentials_snapshot
             )
             console.print(
                 "[bold green]Authentication process completed successfully![/bold green]"
@@ -144,5 +180,3 @@ def authenticate_or_error(*, credentials: Credentials) -> APIAuthData:
             console.print(f"[bold red]Error: {str(e)}[/bold red]")
             logger.error("Failed to authenticate.")
             sys.exit(1)
-
-    console.print("[bold green]Authentication successful![/bold green]")

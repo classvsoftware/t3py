@@ -11,7 +11,10 @@ from rich.table import Table
 from rich.text import Text
 
 from t3py.commands.identity import check_identity
-from t3py.utils.auth import authenticate_or_error, gather_credentials_or_error
+from t3py.utils.auth import (
+    generate_api_auth_data_or_error,
+    generate_credentials_snapshot_or_exit,
+)
 
 app = typer.Typer()
 console = Console()
@@ -38,12 +41,14 @@ def show_menu(api_auth_data):
     while True:
         console.clear()
 
+        # TODO show auth state
+
         # Display a table for the menu
         table = Table(box=box.SIMPLE_HEAD)
         table.add_column("Option", style="bold")
         table.add_column("Description")
         table.add_row("1", "Check Identity")
-        table.add_row("4", "Exit")
+        table.add_row("2", "Exit")
 
         # Wrap the table in a panel
         panel = Panel(
@@ -76,7 +81,6 @@ def show_menu(api_auth_data):
             "[bold purple]Press any key to return to main menu.[/bold purple]"
         )
 
-
 @app.command()
 def main(
     hostname: str = typer.Option(
@@ -106,11 +110,13 @@ def main(
     Authenticate with the Track and Trace Tools API and show a menu of options.
     """
 
-    credentials = gather_credentials_or_error(
-        hostname=hostname, username=username, credential_file=credential_file
+    credentials_snapshot = generate_credentials_snapshot_or_exit(
+        hostname=hostname, username=username, credential_file_path=credential_file
     )
 
-    api_auth_data = authenticate_or_error(credentials=credentials)
+    api_auth_data = generate_api_auth_data_or_error(
+        credentials_snapshot=credentials_snapshot
+    )
 
     console.clear()
 

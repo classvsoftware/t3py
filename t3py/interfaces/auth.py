@@ -5,7 +5,13 @@ from typing import Optional
 
 
 @dataclass(frozen=True)
-class Credentials:
+class StaticCredentials:
+    hostname: str
+    username: str
+    password: str
+    
+@dataclass(frozen=True)
+class CredentialsSnapshot:
     hostname: str
     username: str
     password: str
