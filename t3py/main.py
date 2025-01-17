@@ -9,7 +9,7 @@ from rich.table import Table
 from rich.text import Text
 
 from t3py.commands.identity import check_identity
-from t3py.utils.auth import authenticate_or_error
+from t3py.utils.auth import authenticate_or_error, gather_credentials_or_error
 
 app = typer.Typer()
 console = Console()
@@ -67,23 +67,40 @@ def show_menu(api_auth_data):
 @app.command()
 def main(
     hostname: str = typer.Option(
-        None, help="The hostname where you log into Metrc (e.g., mo.metrc.com)."
+        None,
+        "--hostname",
+        "-h",
+        help="The hostname where you log into Metrc (e.g., mo.metrc.com).",
     ),
-    username: str = typer.Option(None, help="Username used to log into Metrc."),
+    username: str = typer.Option(
+        None, "--username", "-u", help="Username used to log into Metrc."
+    ),
     credential_file: Path = typer.Option(
         None,
-        help="Path to a JSON file containing 'hostname', 'username', and 'password'.",
+        "--credential-file",
+        "-c",
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        readable=True,
+        resolve_path=True,
+        help=(
+            "Path to a JSON file containing 'hostname', 'username', and 'password'. "
+        ),
     ),
 ):
     """
     Authenticate with the Track and Trace Tools API and show a menu of options.
     """
 
-    credentials = gather_credentials_or_error(hostname=hostname, username=username, credential_file=credential_file)
-
-
-    api_auth_data = authenticate_or_error(
-        credentials=credentials
+    credentials = gather_credentials_or_error(
+        hostname=hostname, username=username, credential_file=credential_file
     )
-    
+
+    api_auth_data = authenticate_or_error(credentials=credentials)
+
     show_menu(api_auth_data)
+
+
+if __name__ == "__main__":
+    app()
