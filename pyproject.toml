@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel", "setuptools_scm"]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "t3py"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Toolkit for using the Track & Trace Tools API"
 readme = { file = "README.md", content-type = "text/markdown" }
 authors = [{ name = "Matt Frisbie", email = "matt@classvsoftware.com" }]
@@ -28,5 +28,4 @@ t3py = "t3py.main:app"
 where = ["."]
 
 [tool.setuptools_scm]
-# Optional: Configure file to write the version to
 write_to = "t3py/_version.py"

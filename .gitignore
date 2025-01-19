@@ -1,4 +1,6 @@
 secrets/
+secrets.txt
+t3py/_version.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -109,6 +111,3 @@ ENV/
 # IDE settings
 .vscode/
 .idea/
-
-secrets/
-secrets.txt
