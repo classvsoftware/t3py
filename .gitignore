@@ -1,4 +1,5 @@
 secrets/
+dev-secrets/
 secrets.txt
 t3py/_version.py
 
