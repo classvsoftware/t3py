@@ -18,11 +18,14 @@ urls = { Homepage = "https://github.com/classvsoftware/t3py" }
 requires-python = ">=3.7"
 dependencies = [
     "typer",
-    "requests"
+    "requests",
+    "rich",
+    "textual",
+    "httpx"
 ]
 
 [project.scripts]
-t3py = "t3py.main:app"
+t3py = "t3py.main:cli_app"
 
 [tool.setuptools.packages.find]
 where = ["."]

@@ -6,3 +6,4 @@ flake8
 isort
 setuptools-scm
 pip-tools
+textual-dev

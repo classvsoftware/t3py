@@ -4,18 +4,41 @@
 #
 #    pip-compile requirements.in
 #
+anyio==4.8.0
+    # via httpx
 certifi==2024.8.30
-    # via requests
+    # via
+    #   httpcore
+    #   httpx
+    #   requests
 charset-normalizer==3.4.0
     # via requests
 click==8.1.7
     # via typer
+h11==0.14.0
+    # via httpcore
+httpcore==1.0.7
+    # via httpx
+httpx==0.28.1
+    # via -r requirements.in
 idna==3.10
-    # via requests
-markdown-it-py==3.0.0
-    # via rich
+    # via
+    #   anyio
+    #   httpx
+    #   requests
+linkify-it-py==2.0.3
+    # via markdown-it-py
+markdown-it-py[linkify,plugins]==3.0.0
+    # via
+    #   mdit-py-plugins
+    #   rich
+    #   textual
+mdit-py-plugins==0.4.2
+    # via markdown-it-py
 mdurl==0.1.2
     # via markdown-it-py
+platformdirs==4.3.6
+    # via textual
 pygments==2.18.0
     # via rich
 requests==2.32.3
@@ -23,12 +46,22 @@ requests==2.32.3
 rich==13.9.4
     # via
     #   -r requirements.in
+    #   textual
     #   typer
 shellingham==1.5.4
     # via typer
+sniffio==1.3.1
+    # via anyio
+textual==2.1.2
+    # via -r requirements.in
 typer==0.15.1
     # via -r requirements.in
 typing-extensions==4.12.2
-    # via typer
+    # via
+    #   anyio
+    #   textual
+    #   typer
+uc-micro-py==1.0.3
+    # via linkify-it-py
 urllib3==2.2.3
     # via requests
