@@ -1,11 +1,13 @@
-from typing import Dict, Optional
+from typing import Dict
 
-import requests
+import httpx
 
-from t3py.consts import BASE_URL, TIMEOUT_S, logger
+from t3py.consts.http import BASE_URL, TIMEOUT_S, logger
 
 
-def post_request(*, session: requests.Session, headers: Dict[str, str], url: str, data: Dict) -> requests.Response:
+def post_request(
+    *, session: httpx.Client, headers: Dict[str, str], url: str, data: Dict
+) -> httpx.Response:
     """
     Make a POST request and return the response.
     """
@@ -14,7 +16,9 @@ def post_request(*, session: requests.Session, headers: Dict[str, str], url: str
     return response
 
 
-def get_request(*, session: requests.Session, url: str, headers: Dict[str, str]) -> requests.Response:
+def get_request(
+    *, session: httpx.Client, url: str, headers: Dict[str, str]
+) -> httpx.Response:
     """
     Make a GET request and return the response.
     """

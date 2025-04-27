@@ -1,3 +1,4 @@
+.DS_Store
 secrets/
 secrets.txt
 t3py/_version.py
@@ -111,3 +112,4 @@ ENV/
 # IDE settings
 .vscode/
 .idea/
+.aider*

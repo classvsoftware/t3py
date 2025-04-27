@@ -5,13 +5,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, cast
 
-import requests
+import httpx
 import typer
 from rich.console import Console
 from rich.prompt import Prompt
 from rich.text import Text
 
-from t3py.consts import BASE_URL, logger
+from t3py.consts.http import BASE_URL, logger
 from t3py.interfaces.auth import APIAuthData, CredentialsSnapshot, StaticCredentials
 
 from .http import get_request, post_request
@@ -25,7 +25,7 @@ def metrc_hostname_uses_otp(*, hostname: str) -> bool:
 
 
 def obtain_api_auth_data_or_error(
-    *, session: requests.Session, credentials_snapshot: CredentialsSnapshot
+    *, session: httpx.Client, credentials_snapshot: CredentialsSnapshot
 ) -> APIAuthData:
     """
     Obtain access token using provided credentials.
@@ -167,7 +167,7 @@ def generate_api_auth_data_or_error(
     """
     console.print("[bold cyan]Authenticating...[/bold cyan]")
 
-    with requests.Session() as session:
+    with httpx.Client() as session:
         try:
             api_auth_data = obtain_api_auth_data_or_error(
                 session=session, credentials_snapshot=credentials_snapshot

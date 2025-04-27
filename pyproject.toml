@@ -1,34 +1,29 @@
-[build-system]
-requires = ["setuptools>=64", "setuptools_scm>=8"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "t3py"
-dynamic = ["version"]
-description = "Toolkit for using the Track & Trace Tools API"
-readme = { file = "README.md", content-type = "text/markdown" }
-authors = [{ name = "Matt Frisbie", email = "matt@classvsoftware.com" }]
-license = { text = "MIT" }
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent"
-]
-urls = { Homepage = "https://github.com/classvsoftware/t3py" }
-requires-python = ">=3.7"
+version = "0.1.0"
+description = "Track & Trace Tools Python CLI"
+authors = [{ name = "Matt Frisbie", email = "matt@trackandtrace.tools" }]
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
 dependencies = [
-    "typer",
-    "requests",
-    "rich",
-    "textual",
-    "httpx"
+    "httpx>=0.28.1",
+    "pytest>=8.3.5",
+    "pytest-cov>=6.0.0",
+    "rich>=14.0.0",
+    "typer>=0.15.2",
 ]
 
+# 👇 This enables the CLI command `t3py`
 [project.scripts]
-t3py = "t3py.main:cli_app"
+t3py = "t3py.cli:main"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
-where = ["."]
-
-[tool.setuptools_scm]
-write_to = "t3py/_version.py"
+where = ["src"]
