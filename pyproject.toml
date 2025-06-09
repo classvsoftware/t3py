@@ -1,6 +1,6 @@
 [project]
 name = "t3py"
-version = "0.2.0"
+version = "0.4.1"
 description = "CLI util for the T3 API ecosystem"
 authors = [{ name = "Matt Frisbie", email = "matt@classvsoftware.com" }]
 readme = "README.md"
@@ -9,7 +9,7 @@ requires-python = ">=3.8"
 dependencies = [
     "rich>=14.0.0",
     "t3api >=0.4.0",
-    "t3api-utils>=0.1.1",
+    "t3api-utils>=0.2.0",
     "typer>=0.16.0",
 ]
 

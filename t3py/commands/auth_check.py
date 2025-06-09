@@ -1,24 +1,53 @@
-import typer
+from rich.console import Console, Group
+from rich.panel import Panel
+from rich.rule import Rule
+from rich.table import Table
+from rich.text import Text
 from t3api.api.authentication_api import AuthenticationApi
-from t3api_utils.main.utils import get_authenticated_client
+from t3api_utils.main.utils import get_authenticated_client_or_error
 
-app = typer.Typer()
+console = Console()
 
-@app.command("auth_check")
-def auth_check():
+
+def auth_check() -> None:
     """
-    Verify that credentials are valid and identity can be retrieved from the T3 API.
+    Test if a username is registered to access T3+
     """
-    api_client = get_authenticated_client()
-    
+    api_client = get_authenticated_client_or_error()
     identity = AuthenticationApi(api_client=api_client).v2_auth_whoami_get()
-    
-    # user_data = identity.to_json()
 
-    typer.secho("✅ Successfully authenticated with the T3 API", fg="green")
-    typer.echo(
-        "Status: T3+ access enabled"
-        if identity.has_t3plus
-        else "Status: Limited to free endpoints"
+    # Build the table
+    table = Table(show_header=False, box=None, padding=(0, 1))
+
+    if identity.has_t3plus:
+        status = Text("Registered", style="bold green")
+    else:
+        status = Text("NOT registered", style="bold yellow")
+
+    table.add_row("T3+ Status:", status)
+    table.add_row("T3+ Subscription Tier:", Text(identity.t3plus_subscription_tier or "Free", style="bold magenta"))
+
+    # Docs section with horizontal rule
+    docs_section = Group(
+        Rule(style="dim"),  # horizontal rule
+        Text.from_markup(
+            "[bold]Docs:[/] [underline blue]https://trackandtrace.tools/api[/]"
+        ),
+        Text.from_markup(
+            "[bold]Wiki:[/] [underline blue]https://trackandtrace.tools/wiki[/]"
+        ),
     )
-    typer.echo("Docs: https://trackandtrace.tools/api")
+
+    # Compose all content
+    content = Group(table, Text(), docs_section)
+
+    # Wrap in a panel
+    console.print(
+        Panel(
+            content,
+            title="T3+ Auth Check",
+            title_align="left",
+            border_style="purple",
+            padding=(1, 1),
+        )
+    )

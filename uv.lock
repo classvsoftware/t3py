@@ -692,7 +692,7 @@ wheels = [
 
 [[package]]
 name = "t3api-utils"
-version = "0.1.1"
+version = "0.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "certifi" },
@@ -703,14 +703,14 @@ dependencies = [
     { name = "t3api" },
     { name = "typer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8e/0f/7f648cdc86a3316d7063e68733655ca79b79561505a6ec53d09253fd2250/t3api_utils-0.1.1.tar.gz", hash = "sha256:489d4434f54d14da1d6032698f138678391cc62801b916cd127137d9f3299a87", size = 21223 }
+sdist = { url = "https://files.pythonhosted.org/packages/7d/a1/143e709d73038399d2f8e536786f915c78b1bc4c71db2ea5c881ea843fb7/t3api_utils-0.2.0.tar.gz", hash = "sha256:0abe5ea05ae42b87b5c837c10b329a75b51b01accc43055ab587200ac4c73d14", size = 21370 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/70/e0/869cb1827707fb004221a4e0e9f6c43a9daa4a206ad95739548d6c2d0a7c/t3api_utils-0.1.1-py3-none-any.whl", hash = "sha256:590f3561961f674bd0ff0c4f0fc549d7cd5c01abb511291eda9c710ac7c22bca", size = 19895 },
+    { url = "https://files.pythonhosted.org/packages/5b/23/6397181255be14a12c9ac4871278ab78121287c84f7733e6ce4956ed0b1d/t3api_utils-0.2.0-py3-none-any.whl", hash = "sha256:612b5caca25e4b50fdef3e3607844dde2fa28219f59d7f58c525296e5be137a7", size = 20078 },
 ]
 
 [[package]]
 name = "t3py"
-version = "0.1.0"
+version = "0.4.1"
 source = { editable = "." }
 dependencies = [
     { name = "rich" },
@@ -731,7 +731,7 @@ dev = [
 requires-dist = [
     { name = "rich", specifier = ">=14.0.0" },
     { name = "t3api", specifier = ">=0.4.0" },
-    { name = "t3api-utils", specifier = ">=0.1.1" },
+    { name = "t3api-utils", specifier = ">=0.2.0" },
     { name = "typer", specifier = ">=0.16.0" },
 ]
 
